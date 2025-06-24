@@ -6,16 +6,12 @@ import com.hoangnam25.hnam_courseware.model.entity.Users;
 import com.hoangnam25.hnam_courseware.model.enums.Role;
 import com.hoangnam25.hnam_courseware.repository.UserRepository;
 import com.hoangnam25.hnam_courseware.response.AuthenticationResponse;
-import com.hoangnam25.hnam_courseware.utils.Constants;
+import com.hoangnam25.hnam_courseware.utils.AvatarUtils;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Size;
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,7 +19,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class AuthenticationService {
@@ -44,19 +39,11 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse registerUser(@Valid RegisterRequest request) {
-
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username is already in use");
         }
 
-        Role role = request.getRole();
-
-        List<Role> allowedRoles = List.of(Role.USER, Role.INSTRUCTOR);
-        if (role == null) {
-            role = Role.USER;
-        } else if (!allowedRoles.contains(role)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to register with role: " + role);
-        }
+        Role role = validateAndSetRole(request.getRole());
 
         Users user = Users.builder()
                 .username(request.getUsername())
@@ -65,8 +52,8 @@ public class AuthenticationService {
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .role(role)
+                .imageUrl(getAvatarByRole(role))
                 .createdDate(LocalDateTime.now())
-                .imageUrl(randomAvatar())
                 .build();
 
         userRepository.save(user);
@@ -78,9 +65,27 @@ public class AuthenticationService {
                 .build();
     }
 
-    private String randomAvatar() {
-        List<String> avatars = Constants.AVATARS;
-        return avatars.get(ThreadLocalRandom.current().nextInt(avatars.size()));
+    private Role validateAndSetRole(Role requestRole) {
+        List<Role> allowedRoles = List.of(Role.USER, Role.INSTRUCTOR);
+
+        if (requestRole == null) {
+            return Role.USER;
+        }
+
+        if (!allowedRoles.contains(requestRole)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Not allowed to register with role: " + requestRole);
+        }
+
+        return requestRole;
+    }
+
+    private String getAvatarByRole(Role role) {
+        return switch (role) {
+            case USER -> AvatarUtils.getRandomStudentAvatar();
+            case INSTRUCTOR -> AvatarUtils.getRandomInstructorAvatar();
+            default -> AvatarUtils.getRandomAvatar();
+        };
     }
 
     public AuthenticationResponse login(@Valid LoginRequest request) {
