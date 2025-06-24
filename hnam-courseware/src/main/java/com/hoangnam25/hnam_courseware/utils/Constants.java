@@ -12,9 +12,7 @@ public class Constants {
 
             "https://cdn-icons-png.flaticon.com/512/2995/2995633.png", // Female Student
 
-
             "https://cdn-icons-png.flaticon.com/512/9721/9721110.png", // Male Teacher
-
 
             "https://cdn-icons-png.flaticon.com/512/1995/1995574.png" // Female Teacher
     );
