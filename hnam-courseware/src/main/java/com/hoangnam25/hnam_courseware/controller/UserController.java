@@ -23,7 +23,7 @@ public class UserController {
         String username = SecurityUtil.getUsername();
         return ResponseEntity.ok(userService.findMe(username));
     }
-    @PutMapping("/me")
+    @PatchMapping("/me")
     public ResponseEntity<UserResponseDto> updateCurrentUser(@Valid @RequestBody UserRequest request) {
         String username = SecurityUtil.getUsername();
         return ResponseEntity.ok(userService.updateUserInfo(username, request));

@@ -35,10 +35,18 @@ public class UserService {
         Users user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setEmail(request.getEmail());
-        user.setImageUrl(request.getImageUrl());
+        if (request.getFirstName() != null) {
+            user.setFirstName(request.getFirstName());
+        }
+        if (request.getLastName() != null) {
+            user.setLastName(request.getLastName());
+        }
+        if (request.getEmail() != null) {
+            user.setEmail(request.getEmail());
+        }
+        if (request.getImageUrl() != null) {
+            user.setImageUrl(request.getImageUrl());
+        }
 
         userRepository.save(user);
 
