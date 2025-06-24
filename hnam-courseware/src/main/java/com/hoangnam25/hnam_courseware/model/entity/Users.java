@@ -35,8 +35,10 @@ public class Users implements Serializable {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
     @Size(max = 255)
     private String imageUrl;
+
     @CreationTimestamp
     private LocalDateTime createdDate;
 
