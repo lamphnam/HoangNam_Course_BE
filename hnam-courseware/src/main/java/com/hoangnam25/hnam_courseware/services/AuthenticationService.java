@@ -10,13 +10,16 @@ import com.hoangnam25.hnam_courseware.utils.Constants;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import org.apache.coyote.BadRequestException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -46,7 +49,14 @@ public class AuthenticationService {
             throw new IllegalArgumentException("Username is already in use");
         }
 
-        Role role = request.getRole() != null ? request.getRole() : Role.USER;
+        Role role = request.getRole();
+
+        List<Role> allowedRoles = List.of(Role.USER, Role.INSTRUCTOR);
+        if (role == null) {
+            role = Role.USER;
+        } else if (!allowedRoles.contains(role)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to register with role: " + role);
+        }
 
         Users user = Users.builder()
                 .username(request.getUsername())
@@ -74,11 +84,15 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse login(@Valid LoginRequest request) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
         Users user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
+        } catch (BadCredentialsException ex) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
+        }
 
         String token = jwtService.generateToken(user.getUsername());
 
