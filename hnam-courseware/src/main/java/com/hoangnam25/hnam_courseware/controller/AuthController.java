@@ -1,5 +1,6 @@
 package com.hoangnam25.hnam_courseware.controller;
 
+import com.hoangnam25.hnam_courseware.model.dtos.LoginRequest;
 import com.hoangnam25.hnam_courseware.model.dtos.RegisterRequest;
 import com.hoangnam25.hnam_courseware.response.AuthenticationResponse;
 import com.hoangnam25.hnam_courseware.services.AuthenticationService;
@@ -24,5 +25,11 @@ public class AuthController {
     public ResponseEntity<AuthenticationResponse> registerUser(@Valid @RequestBody RegisterRequest request) {
         AuthenticationResponse response = authenticationService.registerUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthenticationResponse> login(@Valid @RequestBody LoginRequest request) {
+        AuthenticationResponse response = authenticationService.login(request);
+        return ResponseEntity.ok(response);
     }
 }
