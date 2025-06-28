@@ -2,7 +2,7 @@ package com.hoangnam25.hnam_courseware.controller;
 
 import com.hoangnam25.hnam_courseware.model.dtos.LoginRequest;
 import com.hoangnam25.hnam_courseware.model.dtos.RegisterRequest;
-import com.hoangnam25.hnam_courseware.response.AuthenticationResponse;
+import com.hoangnam25.hnam_courseware.model.dtos.AuthenticationResponse;
 import com.hoangnam25.hnam_courseware.services.AuthenticationService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

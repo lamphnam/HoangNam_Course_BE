@@ -1,4 +1,4 @@
-package com.hoangnam25.hnam_courseware.response;
+package com.hoangnam25.hnam_courseware.model.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -5,7 +5,7 @@ import com.hoangnam25.hnam_courseware.model.dtos.RegisterRequest;
 import com.hoangnam25.hnam_courseware.model.entity.Users;
 import com.hoangnam25.hnam_courseware.model.enums.Role;
 import com.hoangnam25.hnam_courseware.repository.UserRepository;
-import com.hoangnam25.hnam_courseware.response.AuthenticationResponse;
+import com.hoangnam25.hnam_courseware.model.dtos.AuthenticationResponse;
 import com.hoangnam25.hnam_courseware.utils.AvatarUtils;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
