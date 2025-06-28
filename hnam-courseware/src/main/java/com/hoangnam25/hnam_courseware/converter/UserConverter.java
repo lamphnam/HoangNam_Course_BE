@@ -3,7 +3,6 @@ package com.hoangnam25.hnam_courseware.converter;
 import com.hoangnam25.hnam_courseware.model.dtos.UserResponseDto;
 import com.hoangnam25.hnam_courseware.model.entity.Users;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("userConverter")
