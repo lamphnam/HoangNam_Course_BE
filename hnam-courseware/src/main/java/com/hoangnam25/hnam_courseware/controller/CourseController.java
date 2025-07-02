@@ -28,7 +28,7 @@ public class CourseController {
     }
 
     @PostMapping()
-    public ResponseEntity<CourseResponseDto> createCourse(@RequestBody CourseRequestDto request) {
+    public ResponseEntity<CourseResponseDto> createCourse(@RequestBody @Valid CourseRequestDto request) {
         String username = SecurityUtil.getUsername();
         CourseResponseDto response = courseService.createCourse(request, username);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

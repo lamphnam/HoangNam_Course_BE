@@ -47,7 +47,7 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseConverter.convertRequestToEntity(request);
 
         course.setCreatedDate(LocalDateTime.now());
-        course.setStatus(CourseStatus.DRAFT);
+        course.setStatus(request.getStatus() != null ? request.getStatus() : CourseStatus.DRAFT);
         course.setInstructor(user);
         courseRepository.save(course);
 

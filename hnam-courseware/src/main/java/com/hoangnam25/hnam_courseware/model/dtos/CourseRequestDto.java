@@ -1,6 +1,7 @@
 package com.hoangnam25.hnam_courseware.model.dtos;
 
 import com.hoangnam25.hnam_courseware.model.enums.CourseDifficulty;
+import com.hoangnam25.hnam_courseware.model.enums.CourseStatus;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
@@ -34,4 +35,6 @@ public class CourseRequestDto {
 
     private String imageUrl;
 
+    @Enumerated(EnumType.STRING)
+    private CourseStatus status;
 }
