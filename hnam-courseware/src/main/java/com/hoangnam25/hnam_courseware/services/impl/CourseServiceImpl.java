@@ -22,6 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -79,7 +80,7 @@ public class CourseServiceImpl implements CourseService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found with id: " + id));
 
         if (!username.equals(course.getInstructor().getUsername())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "You are not authorized to update this course");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to update this course");
         }
         if (request.getTitle() != null) {
             course.setTitle(request.getTitle());
@@ -102,5 +103,17 @@ public class CourseServiceImpl implements CourseService {
         courseRepository.save(course);
         return courseConverter.convertToResponseDTO(course);
 
+    }
+
+    @Override
+    public Map<String, String> deleteCourseById(Long id, String username) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found with id: " + id));
+
+        if (!username.equals(course.getInstructor().getUsername())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to update this course");
+        }
+        courseRepository.deleteById(id);
+        return  Map.of("message", "Course deleted successfully");
     }
 }

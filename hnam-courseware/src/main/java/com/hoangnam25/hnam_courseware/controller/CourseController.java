@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @Validated
 @RequestMapping("api/courses")
@@ -42,14 +44,23 @@ public class CourseController {
         Page<CourseResponseDto> courses = courseService.searchCourses(page, size, direction, attribute, title);
         return ResponseEntity.status(HttpStatus.OK).body(courses);
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<CourseResponseDto> getCourseById(@PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(courseService.findCourseById(id));
     }
+
     @PatchMapping("/{id}")
     public ResponseEntity<CourseResponseDto> updateCourse(@PathVariable("id") Long id, @RequestBody @Valid CourseUpdateRequestDto request) {
         String username = SecurityUtil.getUsername();
         CourseResponseDto response = courseService.updateCourseById(id, request, username);
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> deleteCourse(@PathVariable("id") Long id) {
+        String username = SecurityUtil.getUsername();
+        Map<String, String> response = courseService.deleteCourseById(id, username);
+        return ResponseEntity.ok(response);
     }
 }
