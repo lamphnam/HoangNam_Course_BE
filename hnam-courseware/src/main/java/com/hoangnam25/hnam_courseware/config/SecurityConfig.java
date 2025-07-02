@@ -1,7 +1,7 @@
 package com.hoangnam25.hnam_courseware.config;
 
 import com.hoangnam25.hnam_courseware.filters.JwtAuthFilter;
-import com.hoangnam25.hnam_courseware.services.CustomUserDetailsService;
+import com.hoangnam25.hnam_courseware.services.impl.CustomUserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -54,7 +54,7 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return new CustomUserDetailsService();
+        return new CustomUserDetailsServiceImpl();
     }
 
     @Bean

@@ -1,4 +1,4 @@
-package com.hoangnam25.hnam_courseware.services;
+package com.hoangnam25.hnam_courseware.services.impl;
 
 import com.hoangnam25.hnam_courseware.model.entity.CustomUserDetails;
 import com.hoangnam25.hnam_courseware.model.entity.Users;
@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CustomUserDetailsService implements UserDetailsService {
+public class CustomUserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;

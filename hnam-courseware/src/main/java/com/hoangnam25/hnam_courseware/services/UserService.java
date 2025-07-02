@@ -13,44 +13,9 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Optional;
 
 @Service
-public class UserService {
+public interface UserService {
+    UserResponseDto findMe(String username);
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private UserConverter userConverter;
-
-    public UserResponseDto findMe(String username) {
-        Optional<Users> userOptional = userRepository.findByUsername(username);
-
-        if (userOptional.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
-
-        return userConverter.convertToDTO(userOptional.get());
-    }
-
-    public UserResponseDto updateUserInfo(String username, UserRequest request) {
-        Users user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        if (request.getFirstName() != null) {
-            user.setFirstName(request.getFirstName());
-        }
-        if (request.getLastName() != null) {
-            user.setLastName(request.getLastName());
-        }
-        if (request.getEmail() != null) {
-            user.setEmail(request.getEmail());
-        }
-        if (request.getImageUrl() != null) {
-            user.setImageUrl(request.getImageUrl());
-        }
-
-        userRepository.save(user);
-
-        return userConverter.convertToDTO(user);
-    }
+    UserResponseDto updateUserInfo(String username, UserRequest request);
 
 }

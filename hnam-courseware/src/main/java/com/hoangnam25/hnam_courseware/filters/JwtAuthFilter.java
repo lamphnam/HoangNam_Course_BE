@@ -1,7 +1,7 @@
 package com.hoangnam25.hnam_courseware.filters;
 
-import com.hoangnam25.hnam_courseware.services.CustomUserDetailsService;
 import com.hoangnam25.hnam_courseware.services.JwtService;
+import com.hoangnam25.hnam_courseware.services.impl.CustomUserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,9 +20,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
 
-    private final CustomUserDetailsService customUserDetailsService;
+    private final CustomUserDetailsServiceImpl customUserDetailsService;
 
-    public JwtAuthFilter(JwtService jwtService, CustomUserDetailsService customUserDetailsService) {
+    public JwtAuthFilter(JwtService jwtService, CustomUserDetailsServiceImpl customUserDetailsService) {
         this.jwtService = jwtService;
         this.customUserDetailsService = customUserDetailsService;
     }
