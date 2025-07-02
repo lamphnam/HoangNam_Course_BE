@@ -2,16 +2,20 @@ package com.hoangnam25.hnam_courseware.controller;
 
 import com.hoangnam25.hnam_courseware.model.dtos.CourseRequestDto;
 import com.hoangnam25.hnam_courseware.model.dtos.CourseResponseDto;
+import com.hoangnam25.hnam_courseware.model.dtos.CourseUpdateRequestDto;
 import com.hoangnam25.hnam_courseware.model.enums.DirectionEnum;
 import com.hoangnam25.hnam_courseware.services.CourseService;
 import com.hoangnam25.hnam_courseware.services.impl.CourseServiceImpl;
 import com.hoangnam25.hnam_courseware.utils.SecurityUtil;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Validated
 @RequestMapping("api/courses")
 public class CourseController {
 
@@ -42,5 +46,10 @@ public class CourseController {
     public ResponseEntity<CourseResponseDto> getCourseById(@PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(courseService.findCourseById(id));
     }
-
+    @PatchMapping("/{id}")
+    public ResponseEntity<CourseResponseDto> updateCourse(@PathVariable("id") Long id, @RequestBody @Valid CourseUpdateRequestDto request) {
+        String username = SecurityUtil.getUsername();
+        CourseResponseDto response = courseService.updateCourseById(id, request, username);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }
