@@ -8,6 +8,7 @@ import com.hoangnam25.hnam_courseware.model.entity.Course;
 import com.hoangnam25.hnam_courseware.model.entity.Users;
 import com.hoangnam25.hnam_courseware.model.enums.CourseStatus;
 import com.hoangnam25.hnam_courseware.model.enums.DirectionEnum;
+import com.hoangnam25.hnam_courseware.model.enums.Role;
 import com.hoangnam25.hnam_courseware.repository.CourseRepository;
 import com.hoangnam25.hnam_courseware.repository.UserRepository;
 import com.hoangnam25.hnam_courseware.services.CourseService;
@@ -62,7 +63,7 @@ public class CourseServiceImpl implements CourseService {
         if (ObjectUtils.isEmpty(title)) {
             courses = courseRepository.findAllByStatusIn(List.of(CourseStatus.PUBLISHED), pageable);
         } else {
-            courses = courseRepository.findAllByStatusInAndTitleLike(List.of(CourseStatus.PUBLISHED), title, pageable);
+            courses = courseRepository.findAllByStatusInAndTitleLike(List.of(CourseStatus.PUBLISHED), "%" + title + "%", pageable);
         }
         return courses.map(courseConverter::convertToResponseDTO);
     }
@@ -79,7 +80,9 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found with id: " + id));
 
-        if (!username.equals(course.getInstructor().getUsername())) {
+        Users user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+        if (!username.equals(course.getInstructor().getUsername()) && !(user.getRole().equals(Role.ADMIN))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to update this course");
         }
         if (request.getTitle() != null) {
@@ -109,11 +112,11 @@ public class CourseServiceImpl implements CourseService {
     public Map<String, String> deleteCourseById(Long id, String username) {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found with id: " + id));
-
-        if (!username.equals(course.getInstructor().getUsername())) {
+        Users user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+        if (!username.equals(course.getInstructor().getUsername()) && !(user.getRole().equals(Role.ADMIN))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to update this course");
         }
         courseRepository.deleteById(id);
-        return  Map.of("message", "Course deleted successfully");
+        return Map.of("message", "Course deleted successfully");
     }
 }

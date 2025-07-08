@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class InstructorResponse {
     private Long id;
     private String firstName;
+    private String username;
     private String imageUrl;
 }
