@@ -1,5 +1,6 @@
 package com.hoangnam25.hnam_courseware.services.impl;
 
+import com.hoangnam25.hnam_courseware.exception.*;
 import com.hoangnam25.hnam_courseware.model.dtos.LoginRequest;
 import com.hoangnam25.hnam_courseware.model.dtos.RegisterRequest;
 import com.hoangnam25.hnam_courseware.model.entity.Users;
@@ -10,14 +11,11 @@ import com.hoangnam25.hnam_courseware.services.AuthenticationService;
 import com.hoangnam25.hnam_courseware.services.JwtService;
 import com.hoangnam25.hnam_courseware.utils.AvatarUtils;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,7 +40,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public AuthenticationResponse registerUser(@Valid RegisterRequest request) {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new IllegalArgumentException("Username is already in use");
+            throw new BadRequestException(ErrorMessage.USERNAME_ALREADY_EXISTS);
         }
 
         Role role = validateAndSetRole(request.getRole());
@@ -75,8 +73,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         if (!allowedRoles.contains(requestRole)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Not allowed to register with role: " + requestRole);
+            throw new ForbiddenException(
+                    ErrorMessage.FORBIDDEN_ROLE_REGISTER,
+                    "Not allowed to register with role: " + requestRole
+            );
         }
 
         return requestRole;
@@ -92,13 +92,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public AuthenticationResponse login(@Valid LoginRequest request) {
         Users user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND));
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
         } catch (BadCredentialsException ex) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid username or password");
+            throw new BadRequestException(ErrorMessage.INVALID_USERNAME_PASSWORD);
         }
 
         String token = jwtService.generateToken(user.getUsername());

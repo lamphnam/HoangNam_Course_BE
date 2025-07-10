@@ -1,6 +1,9 @@
 package com.hoangnam25.hnam_courseware.services.impl;
 
 import com.hoangnam25.hnam_courseware.converter.CourseConverter;
+import com.hoangnam25.hnam_courseware.exception.ErrorMessage;
+import com.hoangnam25.hnam_courseware.exception.ForbiddenException;
+import com.hoangnam25.hnam_courseware.exception.NotFoundException;
 import com.hoangnam25.hnam_courseware.model.dtos.CourseRequestDto;
 import com.hoangnam25.hnam_courseware.model.dtos.CourseResponseDto;
 import com.hoangnam25.hnam_courseware.model.dtos.CourseUpdateRequestDto;
@@ -15,10 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,7 +43,7 @@ public class CourseServiceImpl implements CourseService {
         Optional<Users> userOptional = userRepository.findByUsername(username);
 
         Users user = userOptional.orElseThrow(() ->
-                new RuntimeException("User not found with username: " + username));
+                new NotFoundException(ErrorMessage.USER_NOT_FOUND, "User not found with username: " + username));
 
         Course course = courseConverter.convertRequestToEntity(request);
 
@@ -70,17 +71,17 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public CourseResponseDto findCourseById(Long id) {
         Course course = courseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Course not found with id: " + id));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.COURSE_NOT_FOUND, "Course not found with id: " + id));
         return courseConverter.convertToResponseDTO(course);
     }
 
     @Override
     public CourseResponseDto updateCourseById(Long id, CourseUpdateRequestDto request, String username) {
         Course course = courseRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found with id: " + id));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.COURSE_NOT_FOUND, "Course not found with id: " + id));
 
         if (!username.equals(course.getInstructor().getUsername())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to update this course");
+            throw new ForbiddenException(ErrorMessage.FORBIDDEN_AUTHORITY, "You are not authorized to update this course");
         }
         if (request.getTitle() != null) {
             course.setTitle(request.getTitle());
@@ -108,10 +109,10 @@ public class CourseServiceImpl implements CourseService {
     @Override
     public Map<String, String> deleteCourseById(Long id, String username) {
         Course course = courseRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Course not found with id: " + id));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.COURSE_NOT_FOUND, "Course not found with id: " + id));
 
         if (!username.equals(course.getInstructor().getUsername())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to update this course");
+            throw new ForbiddenException(ErrorMessage.FORBIDDEN_AUTHORITY, "You are not authorized to update this course");
         }
         courseRepository.deleteById(id);
         return  Map.of("message", "Course deleted successfully");

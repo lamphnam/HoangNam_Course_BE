@@ -2,11 +2,9 @@ package com.hoangnam25.hnam_courseware.controller;
 
 import com.hoangnam25.hnam_courseware.model.dtos.LoginRequest;
 import com.hoangnam25.hnam_courseware.model.dtos.RegisterRequest;
-import com.hoangnam25.hnam_courseware.model.dtos.AuthenticationResponse;
+import com.hoangnam25.hnam_courseware.response.Response;
 import com.hoangnam25.hnam_courseware.services.AuthenticationService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,14 +17,12 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> registerUser(@Valid @RequestBody RegisterRequest request) {
-        AuthenticationResponse response = authenticationService.registerUser(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public Response registerUser(@Valid @RequestBody RegisterRequest request) {
+        return new Response(authenticationService.registerUser(request));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> login(@Valid @RequestBody LoginRequest request) {
-        AuthenticationResponse response = authenticationService.login(request);
-        return ResponseEntity.ok(response);
+    public Response login(@Valid @RequestBody LoginRequest request) {
+        return new Response(authenticationService.login(request));
     }
 }

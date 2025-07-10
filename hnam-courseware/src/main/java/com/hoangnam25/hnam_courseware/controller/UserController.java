@@ -1,11 +1,10 @@
 package com.hoangnam25.hnam_courseware.controller;
 
 import com.hoangnam25.hnam_courseware.model.dtos.UserRequest;
-import com.hoangnam25.hnam_courseware.model.dtos.UserResponseDto;
+import com.hoangnam25.hnam_courseware.response.Response;
 import com.hoangnam25.hnam_courseware.services.UserService;
 import com.hoangnam25.hnam_courseware.utils.SecurityUtil;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,13 +18,13 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponseDto> getCurrentUser() {
+    public Response getCurrentUser() {
         String username = SecurityUtil.getUsername();
-        return ResponseEntity.ok(userService.findMe(username));
+        return new Response(userService.findMe(username));
     }
     @PatchMapping("/me")
-    public ResponseEntity<UserResponseDto> updateCurrentUser(@Valid @RequestBody UserRequest request) {
+    public Response updateCurrentUser(@Valid @RequestBody UserRequest request) {
         String username = SecurityUtil.getUsername();
-        return ResponseEntity.ok(userService.updateUserInfo(username, request));
+        return new Response(userService.updateUserInfo(username, request));
     }
 }

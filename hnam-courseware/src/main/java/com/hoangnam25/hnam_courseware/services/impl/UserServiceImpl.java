@@ -1,15 +1,14 @@
 package com.hoangnam25.hnam_courseware.services.impl;
 
 import com.hoangnam25.hnam_courseware.converter.UserConverter;
+import com.hoangnam25.hnam_courseware.exception.ErrorMessage;
+import com.hoangnam25.hnam_courseware.exception.NotFoundException;
 import com.hoangnam25.hnam_courseware.model.dtos.UserRequest;
 import com.hoangnam25.hnam_courseware.model.dtos.UserResponseDto;
 import com.hoangnam25.hnam_courseware.model.entity.Users;
 import com.hoangnam25.hnam_courseware.repository.UserRepository;
 import com.hoangnam25.hnam_courseware.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -29,7 +28,7 @@ public class UserServiceImpl implements UserService {
         Optional<Users> userOptional = userRepository.findByUsername(username);
 
         if (userOptional.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            throw new NotFoundException(ErrorMessage.USER_NOT_FOUND, "User not found");
         }
 
         return userConverter.convertToDTO(userOptional.get());
@@ -37,7 +36,7 @@ public class UserServiceImpl implements UserService {
 
     public UserResponseDto updateUserInfo(String username, UserRequest request) {
         Users user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND, "User not found"));
 
         if (request.getFirstName() != null) {
             user.setFirstName(request.getFirstName());
