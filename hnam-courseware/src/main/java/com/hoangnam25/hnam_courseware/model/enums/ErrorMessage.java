@@ -1,4 +1,4 @@
-package com.hoangnam25.hnam_courseware.exception;
+package com.hoangnam25.hnam_courseware.model.enums;
 
 import lombok.Getter;
 

@@ -1,7 +1,7 @@
 package com.hoangnam25.hnam_courseware.services.impl;
 
 import com.hoangnam25.hnam_courseware.converter.UserConverter;
-import com.hoangnam25.hnam_courseware.exception.ErrorMessage;
+import com.hoangnam25.hnam_courseware.model.enums.ErrorMessage;
 import com.hoangnam25.hnam_courseware.exception.NotFoundException;
 import com.hoangnam25.hnam_courseware.model.dtos.UserRequest;
 import com.hoangnam25.hnam_courseware.model.dtos.UserResponseDto;

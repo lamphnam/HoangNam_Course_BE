@@ -4,6 +4,7 @@ import com.hoangnam25.hnam_courseware.exception.*;
 import com.hoangnam25.hnam_courseware.model.dtos.LoginRequest;
 import com.hoangnam25.hnam_courseware.model.dtos.RegisterRequest;
 import com.hoangnam25.hnam_courseware.model.entity.Users;
+import com.hoangnam25.hnam_courseware.model.enums.ErrorMessage;
 import com.hoangnam25.hnam_courseware.model.enums.Role;
 import com.hoangnam25.hnam_courseware.repository.UserRepository;
 import com.hoangnam25.hnam_courseware.model.dtos.AuthenticationResponse;

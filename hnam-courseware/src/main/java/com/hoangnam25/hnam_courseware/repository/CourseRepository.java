@@ -19,4 +19,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     Page<Course> findAllByStatusInAndTitleLike(Collection<CourseStatus> status, String title, Pageable pageable);
 
     Course findAllById(Long id);
+
+    Page<Course> findAllByInstructorUsername(String username, Pageable pageable);
+
 }

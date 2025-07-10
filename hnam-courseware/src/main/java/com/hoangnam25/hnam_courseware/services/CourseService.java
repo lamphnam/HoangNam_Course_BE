@@ -18,4 +18,6 @@ public interface CourseService {
     CourseResponseDto updateCourseById(Long id, CourseUpdateRequestDto request, String username);
 
     Map<String, String> deleteCourseById(Long id, String username);
+
+    Page<CourseResponseDto> getInstructorCourses(String username, int page, int size);
 }

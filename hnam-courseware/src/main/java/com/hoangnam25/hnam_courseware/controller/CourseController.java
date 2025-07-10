@@ -36,7 +36,14 @@ public class CourseController {
             @RequestParam(name = "attribute", required = false, defaultValue = "createdDate") String attribute,
             @RequestParam(name = "title", required = false) String title) {
         return new Response(courseService.searchCourses(page, size, direction, attribute, title));
+    }
 
+    @GetMapping("/instructor")
+    public Response getInstructorCourses(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
+        String username = SecurityUtil.getUsername();
+        return new Response(courseService.getInstructorCourses(username, page, size));
     }
 
     @GetMapping("/{id}")

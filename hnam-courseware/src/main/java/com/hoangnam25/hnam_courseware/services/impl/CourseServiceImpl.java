@@ -1,7 +1,7 @@
 package com.hoangnam25.hnam_courseware.services.impl;
 
 import com.hoangnam25.hnam_courseware.converter.CourseConverter;
-import com.hoangnam25.hnam_courseware.exception.ErrorMessage;
+import com.hoangnam25.hnam_courseware.model.enums.ErrorMessage;
 import com.hoangnam25.hnam_courseware.exception.ForbiddenException;
 import com.hoangnam25.hnam_courseware.exception.NotFoundException;
 import com.hoangnam25.hnam_courseware.model.dtos.CourseRequestDto;
@@ -116,5 +116,12 @@ public class CourseServiceImpl implements CourseService {
         }
         courseRepository.deleteById(id);
         return  Map.of("message", "Course deleted successfully");
+    }
+
+    @Override
+    public Page<CourseResponseDto> getInstructorCourses(String username, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
+        Page<Course> courses = courseRepository.findAllByInstructorUsername(username, pageable);
+        return courses.map(courseConverter::convertToResponseDTO);
     }
 }

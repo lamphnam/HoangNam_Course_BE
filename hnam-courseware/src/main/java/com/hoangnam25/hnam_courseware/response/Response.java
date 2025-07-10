@@ -1,7 +1,7 @@
 package com.hoangnam25.hnam_courseware.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.hoangnam25.hnam_courseware.exception.ErrorMessage;
+import com.hoangnam25.hnam_courseware.model.enums.ErrorMessage;
 import com.hoangnam25.hnam_courseware.exception.GenericException;
 import lombok.Data;
 
