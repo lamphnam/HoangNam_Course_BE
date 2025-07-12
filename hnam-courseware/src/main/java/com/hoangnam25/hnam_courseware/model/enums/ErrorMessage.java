@@ -10,7 +10,9 @@ public enum ErrorMessage {
     USERNAME_ALREADY_EXISTS(400, 1003, "Username is already in use"),
     FORBIDDEN_ROLE_REGISTER(403, 1004, "Not allowed to register with this role"),
     INVALID_USERNAME_PASSWORD(400, 1005, "Invalid username or password"),
-    FORBIDDEN_AUTHORITY(403, 1006, "Forbidden authority");
+    FORBIDDEN_AUTHORITY(403, 1006, "Forbidden authority"),
+    INVALID_ENROLLMENT(400, 1007, "Invalid enrollment"),
+    ALREADY_ENROLLMENT(400, 1008, "Already enrollment");
 
     private final int httpStatus;
     private final int code;
