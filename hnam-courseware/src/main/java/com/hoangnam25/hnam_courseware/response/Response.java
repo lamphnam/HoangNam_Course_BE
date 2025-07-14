@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hoangnam25.hnam_courseware.model.enums.ErrorMessage;
 import com.hoangnam25.hnam_courseware.exception.GenericException;
 import lombok.Data;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -21,8 +22,15 @@ public class Response {
     private String traceId;
     private Object data;
 
+    private PagedResult pagedResult;
+
     public Response(Object data) {
-        this.data = data;
+        if (data instanceof Page) {
+            Page<Object> objectPage = (Page<Object>) data;
+            this.data = objectPage.getContent();
+            this.pagedResult = new PagedResult(objectPage.getNumber() + 1, objectPage.getSize(),
+                    objectPage.getTotalElements(), objectPage.getTotalPages());
+        } else this.data = data;
     }
 
     public Response(GenericException ex) {
