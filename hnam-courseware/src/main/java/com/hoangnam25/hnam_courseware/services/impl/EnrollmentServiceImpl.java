@@ -172,4 +172,27 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Page<Enrollment> enrollments = enrollmentRepository.findAll(spec, pageable);
         return enrollments.map(studentEnrollmentConverter::convertToDTO);
     }
+
+    @Override
+    @Transactional
+    public StudentEnrollmentResponseDto updateEnrollment(String username, Long enrollmentId, UpdateEnrollmentRequestDto request) {
+        Enrollment enrollment = enrollmentRepository.findById(enrollmentId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.ENROLLMENT_NOT_FOUND, "You have not enrolled in this course"));
+        Course course = enrollment.getCourse();
+        if (!course.getInstructor().getUsername().equals(username)) {
+            throw new ForbiddenException(ErrorMessage.FORBIDDEN_AUTHORITY, "You are not the instructor of this course.");
+        }
+        if (request.getProgressPercentage() != null) {
+            enrollment.setProgressPercentage(request.getProgressPercentage());
+        }
+
+        if (request.getStatus() != null) {
+            enrollment.setStatus(request.getStatus());
+            if (request.getStatus() == EnrollmentStatus.COMPLETED) {
+                enrollment.setCompletedDate(LocalDateTime.now());
+            }
+        }
+        enrollmentRepository.save(enrollment);
+        return  studentEnrollmentConverter.convertToDTO(enrollment);
+    }
 }

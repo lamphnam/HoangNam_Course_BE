@@ -1,11 +1,13 @@
 package com.hoangnam25.hnam_courseware.controller;
 
 import com.hoangnam25.hnam_courseware.model.dtos.StudentSearchRequestDto;
+import com.hoangnam25.hnam_courseware.model.dtos.UpdateEnrollmentRequestDto;
 import com.hoangnam25.hnam_courseware.model.enums.DirectionEnum;
 import com.hoangnam25.hnam_courseware.model.enums.EnrollmentStatus;
 import com.hoangnam25.hnam_courseware.response.Response;
 import com.hoangnam25.hnam_courseware.services.EnrollmentService;
 import com.hoangnam25.hnam_courseware.utils.SecurityUtil;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,5 +44,12 @@ public class InstructorController {
                         .status(status)
                         .build()
                 ));
+    }
+    @PatchMapping("/enrollments/{enrollmentId}")
+    public Response updateEnrollment(
+            @PathVariable Long enrollmentId,
+            @RequestBody @Valid UpdateEnrollmentRequestDto request) {
+        String username = SecurityUtil.getUsername();
+        return new Response(enrollmentService.updateEnrollment(username, enrollmentId, request));
     }
 }
