@@ -5,6 +5,7 @@ import com.hoangnam25.hnam_courseware.exception.BadRequestException;
 import com.hoangnam25.hnam_courseware.exception.NotFoundException;
 import com.hoangnam25.hnam_courseware.model.dtos.EnrollmentRequestDto;
 import com.hoangnam25.hnam_courseware.model.dtos.EnrollmentResponseDto;
+import com.hoangnam25.hnam_courseware.model.dtos.EnrollmentSearchRequestDto;
 import com.hoangnam25.hnam_courseware.model.entity.Course;
 import com.hoangnam25.hnam_courseware.model.entity.Enrollment;
 import com.hoangnam25.hnam_courseware.model.entity.Users;
@@ -15,12 +16,20 @@ import com.hoangnam25.hnam_courseware.repository.EnrollmentRepository;
 import com.hoangnam25.hnam_courseware.repository.UserRepository;
 import com.hoangnam25.hnam_courseware.services.EnrollmentService;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
+
+import static com.hoangnam25.hnam_courseware.specification.EnrollmentSpecification.*;
 
 @Service
 public class EnrollmentServiceImpl implements EnrollmentService {
@@ -80,5 +89,55 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Enrollment savedEnrollment = enrollmentRepository.save(enrollmentToSave);
 
         return enrollmentConverter.convertToDTO(savedEnrollment);
+    }
+
+    @Override
+    @Transactional
+    public EnrollmentResponseDto cancelEnrollment(String username, Long courseId) {
+        Users user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND, "User not found with username: " + username));
+
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.COURSE_NOT_FOUND, "Course not found"));
+
+        Enrollment enrollment = enrollmentRepository.findByUserIdAndCourseId(user.getId(), course.getId())
+                .orElseThrow(() -> new BadRequestException(ErrorMessage.ALREADY_ENROLLMENT, "You are not enrolled in this course"));
+
+        if (enrollment.getStatus().equals(EnrollmentStatus.CANCELLED)) {
+            throw new BadRequestException(ErrorMessage.ALREADY_UNENROLLMENT, "You already unenrolled this course");
+        }
+        if (enrollment.getStatus().equals(EnrollmentStatus.COMPLETED)) {
+            throw new BadRequestException(ErrorMessage.CANNOT_CANCEL_COMPLETED_COURSE, "Cannot cancel a completed course");
+        }
+        enrollment.setStatus(EnrollmentStatus.CANCELLED);
+        Enrollment saved = enrollmentRepository.save(enrollment);
+
+        return enrollmentConverter.convertToDTO(saved);
+    }
+
+    @Override
+    public Page<EnrollmentResponseDto> getEnrollmentsByUserId(String username, EnrollmentSearchRequestDto request) {
+        Users user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND, "User not found with username: " + username));
+        Specification<Enrollment> spec = belongsToUser(user.getId());
+
+        if (request.getStatus() != null) {
+            spec = spec.and(hasStatus(request.getStatus()));
+        }
+        if (StringUtils.hasText(request.getTitle())) {
+            spec = spec.and(courseTitleContains(request.getTitle()));
+        }
+
+        if (request.getEnrolledDate() != null) {
+            spec = spec.and(enrolledAfter(request.getEnrolledDate()));
+        }
+        if (request.getProgressPercentage() != null) {
+            spec = spec.and(hasProgressGreaterThan(request.getProgressPercentage()));
+        }
+
+        Sort sortable = Sort.by(Sort.Direction.fromString(request.getDirection().name()), request.getAttribute());
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sortable);
+        Page<Enrollment> enrollments = enrollmentRepository.findAll(spec, pageable);
+        return enrollments.map(enrollmentConverter::convertToDTO);
     }
 }

@@ -12,8 +12,10 @@ public enum ErrorMessage {
     INVALID_USERNAME_PASSWORD(400, 1005, "Invalid username or password"),
     FORBIDDEN_AUTHORITY(403, 1006, "Forbidden authority"),
     INVALID_ENROLLMENT(400, 1007, "Invalid enrollment"),
-    ALREADY_ENROLLMENT(400, 1008, "Already enrollment");
-
+    ALREADY_ENROLLMENT(400, 1008, "Already enrollment"),
+    ALREADY_UNENROLLMENT(400, 1009, "Already unenrollment"),
+    CANNOT_CANCEL_COMPLETED_COURSE(400, 1010, "Cannot cancel a completed course");
+    
     private final int httpStatus;
     private final int code;
     private final String message;

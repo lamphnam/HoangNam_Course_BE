@@ -16,6 +16,21 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@NamedEntityGraph(
+        name = "Enrollment.withDetails",
+        attributeNodes = {
+                @NamedAttributeNode("user"),
+                @NamedAttributeNode(value = "course", subgraph = "course-with-instructor")
+        },
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "course-with-instructor",
+                        attributeNodes = {
+                                @NamedAttributeNode("instructor")
+                        }
+                )
+        }
+)
 public class Enrollment implements Serializable {
 
     @Id
