@@ -1,10 +1,12 @@
 package com.hoangnam25.hnam_courseware.specification;
 
 import com.hoangnam25.hnam_courseware.model.entity.Enrollment;
+import com.hoangnam25.hnam_courseware.model.entity.Users;
 import com.hoangnam25.hnam_courseware.model.enums.EnrollmentStatus;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -43,7 +45,21 @@ public class EnrollmentSpecification {
             return cb.greaterThanOrEqualTo(root.get("progressPercentage"), progressPercentage);
         };
     }
-
+    public static Specification<Enrollment> hasCourseId(Long courseId) {
+        return (root, query, cb) -> cb.equal(root.get("course").get("id"), courseId);
+    }
+    public static Specification<Enrollment> studentNameContains(String studentName) {
+        return (root, query, cb) -> {
+            if (!StringUtils.hasText(studentName)) {
+                return cb.conjunction();
+            }
+            Join<Enrollment, Users> userJoin = root.join("user");
+            return cb.like(
+                    cb.lower(cb.concat(userJoin.get("firstName"), " ")),
+                    "%" + studentName.toLowerCase() + "%"
+            );
+        };
+    }
 
 
 }

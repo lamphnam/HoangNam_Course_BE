@@ -16,4 +16,5 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long>, J
     @Override
     @EntityGraph(value = "Enrollment.withDetails")
     Page<Enrollment> findAll(Specification<Enrollment> spec, Pageable pageable);
+
 }

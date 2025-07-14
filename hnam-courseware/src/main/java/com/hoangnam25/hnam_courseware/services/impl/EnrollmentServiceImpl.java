@@ -1,11 +1,11 @@
 package com.hoangnam25.hnam_courseware.services.impl;
 
 import com.hoangnam25.hnam_courseware.converter.EnrollmentConverter;
+import com.hoangnam25.hnam_courseware.converter.StudentEnrollmentConverter;
 import com.hoangnam25.hnam_courseware.exception.BadRequestException;
+import com.hoangnam25.hnam_courseware.exception.ForbiddenException;
 import com.hoangnam25.hnam_courseware.exception.NotFoundException;
-import com.hoangnam25.hnam_courseware.model.dtos.EnrollmentRequestDto;
-import com.hoangnam25.hnam_courseware.model.dtos.EnrollmentResponseDto;
-import com.hoangnam25.hnam_courseware.model.dtos.EnrollmentSearchRequestDto;
+import com.hoangnam25.hnam_courseware.model.dtos.*;
 import com.hoangnam25.hnam_courseware.model.entity.Course;
 import com.hoangnam25.hnam_courseware.model.entity.Enrollment;
 import com.hoangnam25.hnam_courseware.model.entity.Users;
@@ -38,12 +38,14 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final EnrollmentConverter enrollmentConverter;
+    private final StudentEnrollmentConverter studentEnrollmentConverter;
 
-    public EnrollmentServiceImpl(UserRepository userRepository, CourseRepository courseRepository, EnrollmentRepository enrollmentRepository, EnrollmentConverter enrollmentConverter) {
+    public EnrollmentServiceImpl(UserRepository userRepository, CourseRepository courseRepository, EnrollmentRepository enrollmentRepository, EnrollmentConverter enrollmentConverter, StudentEnrollmentConverter studentEnrollmentConverter) {
         this.userRepository = userRepository;
         this.courseRepository = courseRepository;
         this.enrollmentRepository = enrollmentRepository;
         this.enrollmentConverter = enrollmentConverter;
+        this.studentEnrollmentConverter = studentEnrollmentConverter;
     }
 
     @Override
@@ -139,5 +141,35 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sortable);
         Page<Enrollment> enrollments = enrollmentRepository.findAll(spec, pageable);
         return enrollments.map(enrollmentConverter::convertToDTO);
+    }
+
+    @Override
+    public EnrollmentResponseDto getEnrollmentDetailForUser(String username, Long courseId) {
+        Users user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND, "User not found with username: " + username));
+        Enrollment enrollment = enrollmentRepository.findByUserIdAndCourseId(user.getId(), courseId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.ENROLLMENT_NOT_FOUND, "You have not enrolled in this course"));
+        return enrollmentConverter.convertToDTO(enrollment);
+    }
+
+    @Override
+    public Page<StudentEnrollmentResponseDto> getEnrollmentsForCourse(String username, Long courseId, StudentSearchRequestDto request) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.COURSE_NOT_FOUND, "Course not found"));
+        if (!course.getInstructor().getUsername().equals(username)) {
+            throw new ForbiddenException(ErrorMessage.FORBIDDEN_AUTHORITY, "You are not the instructor of this course.");
+        }
+        Specification<Enrollment> spec = hasCourseId(courseId);
+        if (request.getStudentName() != null) {
+            spec = spec.and(studentNameContains(request.getStudentName()));
+        }
+
+        if (request.getStatus() != null) {
+            spec = spec.and(hasStatus(request.getStatus()));
+        }
+        Sort sortable = Sort.by(Sort.Direction.fromString(request.getDirection().name()), request.getAttribute());
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sortable);
+        Page<Enrollment> enrollments = enrollmentRepository.findAll(spec, pageable);
+        return enrollments.map(studentEnrollmentConverter::convertToDTO);
     }
 }

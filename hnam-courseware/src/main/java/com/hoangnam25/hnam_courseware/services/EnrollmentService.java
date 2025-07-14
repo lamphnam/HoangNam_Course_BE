@@ -1,9 +1,7 @@
 package com.hoangnam25.hnam_courseware.services;
 
 
-import com.hoangnam25.hnam_courseware.model.dtos.EnrollmentRequestDto;
-import com.hoangnam25.hnam_courseware.model.dtos.EnrollmentResponseDto;
-import com.hoangnam25.hnam_courseware.model.dtos.EnrollmentSearchRequestDto;
+import com.hoangnam25.hnam_courseware.model.dtos.*;
 import org.springframework.data.domain.Page;
 
 public interface EnrollmentService {
@@ -12,5 +10,9 @@ public interface EnrollmentService {
     EnrollmentResponseDto cancelEnrollment(String username, Long id);
 
     Page<EnrollmentResponseDto> getEnrollmentsByUserId(String username, EnrollmentSearchRequestDto request);
+
+    EnrollmentResponseDto getEnrollmentDetailForUser(String username, Long courseId);
+
+    Page<StudentEnrollmentResponseDto> getEnrollmentsForCourse(String username, Long courseId, StudentSearchRequestDto request);
 }
 

@@ -28,7 +28,7 @@ public class EnrollmentController {
         return new Response(enrollmentService.enrollUserToCourse(request, username));
     }
 
-    @DeleteMapping("/{courseId}")
+    @DeleteMapping("/cancel/{courseId}")
     public Response unenrollCourse(@PathVariable Long courseId) {
         String username = SecurityUtil.getUsername();
         return new Response(enrollmentService.cancelEnrollment(username, courseId));
@@ -57,5 +57,10 @@ public class EnrollmentController {
                         .enrolledDate(enrolledDate)
                         .progressPercentage(progressPercentage)
                         .build()));
+    }
+    @GetMapping("/me/{courseId}")
+    public Response getEnrollmentByCourseId(@PathVariable Long courseId) {
+        String username = SecurityUtil.getUsername();
+        return new Response(enrollmentService.getEnrollmentDetailForUser(username, courseId));
     }
 }

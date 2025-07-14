@@ -14,7 +14,8 @@ public enum ErrorMessage {
     INVALID_ENROLLMENT(400, 1007, "Invalid enrollment"),
     ALREADY_ENROLLMENT(400, 1008, "Already enrollment"),
     ALREADY_UNENROLLMENT(400, 1009, "Already unenrollment"),
-    CANNOT_CANCEL_COMPLETED_COURSE(400, 1010, "Cannot cancel a completed course");
+    CANNOT_CANCEL_COMPLETED_COURSE(400, 1010, "Cannot cancel a completed course"),
+    ENROLLMENT_NOT_FOUND(400, 1011, "Enrollment not found");
     
     private final int httpStatus;
     private final int code;
