@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -18,7 +18,7 @@ public class StudentEnrollmentResponseDto {
     private UserResponseDto user;
     private EnrollmentStatus status;
     private BigDecimal progressPercentage;
-    private LocalDate enrolledDate;
-    private LocalDate completedDate;
+    private LocalDateTime enrolledDate;
+    private LocalDateTime completedDate;
 
 }
