@@ -24,6 +24,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -73,6 +74,7 @@ public class ReviewServiceImpl implements ReviewService {
         review.setUpdatedDate(LocalDateTime.now());
 
         Review saved = reviewRepository.save(review);
+        updateCourseRating(saved.getCourse().getId());
 
         return reviewConverter.convertToDTO(saved);
 
@@ -96,5 +98,14 @@ public class ReviewServiceImpl implements ReviewService {
         Page<Review> reviews = reviewRepository.findAll(spec, pageable);
 
         return reviews.map(reviewConverter::convertToDTO);
+    }
+    private void updateCourseRating(Long courseId) {
+        BigDecimal newAvgRating = reviewRepository.calculateAverageRating(courseId);
+        Long newReviewCount = reviewRepository.countByCourseId(courseId);
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.COURSE_NOT_FOUND, "Course not found"));
+        course.setAverageRating(newAvgRating != null ?  newAvgRating : course.getAverageRating());
+        course.setReviewCount(newReviewCount);
+        courseRepository.save(course);
     }
 }

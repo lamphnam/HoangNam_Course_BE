@@ -49,4 +49,10 @@ public class Course implements Serializable {
     @JoinColumn(name = "instructor_id")
     private Users instructor;
 
+    @Column(precision = 2, scale = 1)
+    private BigDecimal averageRating;
+
+    @Column
+    private Long reviewCount;
+
 }

@@ -26,5 +26,8 @@ public class CourseResponseDto {
 
     private InstructorResponse instructor;
 
+    private BigDecimal averageRating;
+    private Long reviewCount;
+
 }
 
