@@ -5,6 +5,7 @@ import com.hoangnam25.hnam_courseware.exception.BadRequestException;
 import com.hoangnam25.hnam_courseware.exception.NotFoundException;
 import com.hoangnam25.hnam_courseware.model.dtos.ReviewRequestDto;
 import com.hoangnam25.hnam_courseware.model.dtos.ReviewResponseDto;
+import com.hoangnam25.hnam_courseware.model.dtos.ReviewSearchRequestDto;
 import com.hoangnam25.hnam_courseware.model.entity.Course;
 import com.hoangnam25.hnam_courseware.model.entity.Review;
 import com.hoangnam25.hnam_courseware.model.entity.Users;
@@ -15,6 +16,12 @@ import com.hoangnam25.hnam_courseware.repository.EnrollmentRepository;
 import com.hoangnam25.hnam_courseware.repository.ReviewRepository;
 import com.hoangnam25.hnam_courseware.repository.UserRepository;
 import com.hoangnam25.hnam_courseware.services.ReviewService;
+import com.hoangnam25.hnam_courseware.specification.ReviewSpecification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -69,5 +76,25 @@ public class ReviewServiceImpl implements ReviewService {
 
         return reviewConverter.convertToDTO(saved);
 
+    }
+
+    @Override
+    public Page<ReviewResponseDto> getReviewsForCourse(Long courseId, ReviewSearchRequestDto request) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.COURSE_NOT_FOUND, "Course not found"));
+
+        Specification<Review> spec = ReviewSpecification.belongsToCourse(courseId);
+
+        if(request.getRating() != null) {
+            spec = spec.and(ReviewSpecification.hasRating(request.getRating()));
+        }
+
+        Sort sortable = Sort.by(Sort.Direction.fromString(request.getDirection().name()), request.getAttribute());
+
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sortable);
+
+        Page<Review> reviews = reviewRepository.findAll(spec, pageable);
+
+        return reviews.map(reviewConverter::convertToDTO);
     }
 }

@@ -13,6 +13,13 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@NamedEntityGraph(
+        name = "Review.withUserAndCourse",
+        attributeNodes = {
+                @NamedAttributeNode("user"),
+                @NamedAttributeNode("course")
+        }
+)
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
