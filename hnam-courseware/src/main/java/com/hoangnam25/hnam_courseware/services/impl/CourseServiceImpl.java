@@ -1,6 +1,7 @@
 package com.hoangnam25.hnam_courseware.services.impl;
 
 import com.hoangnam25.hnam_courseware.converter.CourseConverter;
+import com.hoangnam25.hnam_courseware.model.dtos.CourseSearchRequestDto;
 import com.hoangnam25.hnam_courseware.model.enums.ErrorMessage;
 import com.hoangnam25.hnam_courseware.exception.ForbiddenException;
 import com.hoangnam25.hnam_courseware.exception.NotFoundException;
@@ -14,12 +15,15 @@ import com.hoangnam25.hnam_courseware.model.enums.DirectionEnum;
 import com.hoangnam25.hnam_courseware.repository.CourseRepository;
 import com.hoangnam25.hnam_courseware.repository.UserRepository;
 import com.hoangnam25.hnam_courseware.services.CourseService;
+import com.hoangnam25.hnam_courseware.specification.CourseSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -56,15 +60,19 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Page<CourseResponseDto> searchCourses(Integer page, Integer size, DirectionEnum direction, String attribute, String title) {
-        Sort sortable = Sort.by(Sort.Direction.fromString(direction.name()), attribute);
-        Pageable pageable = PageRequest.of(page, size, sortable);
-        Page<Course> courses;
-        if (ObjectUtils.isEmpty(title)) {
-            courses = courseRepository.findAllByStatusIn(List.of(CourseStatus.PUBLISHED), pageable);
-        } else {
-            courses = courseRepository.findAllByStatusInAndTitleLike(List.of(CourseStatus.PUBLISHED), title, pageable);
-        }
+    public Page<CourseResponseDto> searchCourses(CourseSearchRequestDto request) {
+        Specification<Course> spec = CourseSpecification.hasStatus(CourseStatus.PUBLISHED)
+                .and(CourseSpecification.hasTitleLike(request.getTitle()))
+                .and(CourseSpecification.hasDifficulty(request.getDifficulty()))
+                .and(CourseSpecification.hasPriceBetween(request.getMinPrice(), request.getMaxPrice()))
+                .and(CourseSpecification.hasMinRating(request.getMinRating()));
+
+        Sort sortable = Sort.by(Sort.Direction.fromString(request.getDirection().name()), request.getAttribute());
+
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), sortable);
+
+        Page<Course> courses = courseRepository.findAll(spec, pageable);
+
         return courses.map(courseConverter::convertToResponseDTO);
     }
 
@@ -115,7 +123,7 @@ public class CourseServiceImpl implements CourseService {
             throw new ForbiddenException(ErrorMessage.FORBIDDEN_AUTHORITY, "You are not authorized to update this course");
         }
         courseRepository.deleteById(id);
-        return  Map.of("message", "Course deleted successfully");
+        return Map.of("message", "Course deleted successfully");
     }
 
     @Override
