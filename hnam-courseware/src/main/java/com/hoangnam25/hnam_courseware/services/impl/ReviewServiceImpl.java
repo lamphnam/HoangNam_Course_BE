@@ -2,15 +2,18 @@ package com.hoangnam25.hnam_courseware.services.impl;
 
 import com.hoangnam25.hnam_courseware.converter.ReviewConverter;
 import com.hoangnam25.hnam_courseware.exception.BadRequestException;
+import com.hoangnam25.hnam_courseware.exception.ForbiddenException;
 import com.hoangnam25.hnam_courseware.exception.NotFoundException;
 import com.hoangnam25.hnam_courseware.model.dtos.ReviewRequestDto;
 import com.hoangnam25.hnam_courseware.model.dtos.ReviewResponseDto;
 import com.hoangnam25.hnam_courseware.model.dtos.ReviewSearchRequestDto;
+import com.hoangnam25.hnam_courseware.model.dtos.ReviewUpdateRequestDto;
 import com.hoangnam25.hnam_courseware.model.entity.Course;
 import com.hoangnam25.hnam_courseware.model.entity.Review;
 import com.hoangnam25.hnam_courseware.model.entity.Users;
 import com.hoangnam25.hnam_courseware.model.enums.EnrollmentStatus;
 import com.hoangnam25.hnam_courseware.model.enums.ErrorMessage;
+import com.hoangnam25.hnam_courseware.model.enums.Role;
 import com.hoangnam25.hnam_courseware.repository.CourseRepository;
 import com.hoangnam25.hnam_courseware.repository.EnrollmentRepository;
 import com.hoangnam25.hnam_courseware.repository.ReviewRepository;
@@ -27,6 +30,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ReviewServiceImpl implements ReviewService {
@@ -87,7 +91,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         Specification<Review> spec = ReviewSpecification.belongsToCourse(courseId);
 
-        if(request.getRating() != null) {
+        if (request.getRating() != null) {
             spec = spec.and(ReviewSpecification.hasRating(request.getRating()));
         }
 
@@ -99,12 +103,48 @@ public class ReviewServiceImpl implements ReviewService {
 
         return reviews.map(reviewConverter::convertToDTO);
     }
+
+    @Override
+    public ReviewResponseDto updateReview(Long id, String username, ReviewUpdateRequestDto request) {
+        Users currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND, "User not found with username: " + username));
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.REVIEW_NOT_FOUND));
+        if (!currentUser.getId().equals(review.getUser().getId())) {
+            throw new ForbiddenException(ErrorMessage.FORBIDDEN_AUTHORITY);
+        }
+        if (request.getComment() != null) {
+            review.setComment(request.getComment());
+        }
+        if (request.getRating() != null) {
+            review.setRating(request.getRating());
+        }
+        review.setUpdatedDate(LocalDateTime.now());
+        updateCourseRating(review.getCourse().getId());
+        reviewRepository.save(review);
+        return reviewConverter.convertToDTO(review);
+    }
+
+    @Override
+    public Map<String, String> deleteReview(Long id, String username) {
+        Users currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.USER_NOT_FOUND, "User not found with username: " + username));
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ErrorMessage.REVIEW_NOT_FOUND));
+        if (!currentUser.getId().equals(review.getUser().getId()) && !currentUser.getRole().equals(Role.ADMIN)) {
+            throw new ForbiddenException(ErrorMessage.FORBIDDEN_AUTHORITY);
+        }
+        reviewRepository.delete(review);
+        updateCourseRating(review.getCourse().getId());
+        return Map.of("message", "Review deleted successfully");
+    }
+
     private void updateCourseRating(Long courseId) {
         BigDecimal newAvgRating = reviewRepository.calculateAverageRating(courseId);
         Long newReviewCount = reviewRepository.countByCourseId(courseId);
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new NotFoundException(ErrorMessage.COURSE_NOT_FOUND, "Course not found"));
-        course.setAverageRating(newAvgRating != null ?  newAvgRating : course.getAverageRating());
+        course.setAverageRating(newAvgRating != null ? newAvgRating : course.getAverageRating());
         course.setReviewCount(newReviewCount);
         courseRepository.save(course);
     }

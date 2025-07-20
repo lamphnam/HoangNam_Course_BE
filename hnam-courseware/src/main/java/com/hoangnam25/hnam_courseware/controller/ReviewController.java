@@ -1,13 +1,11 @@
 package com.hoangnam25.hnam_courseware.controller;
 
 import com.hoangnam25.hnam_courseware.model.dtos.ReviewRequestDto;
+import com.hoangnam25.hnam_courseware.model.dtos.ReviewUpdateRequestDto;
 import com.hoangnam25.hnam_courseware.response.Response;
 import com.hoangnam25.hnam_courseware.services.ReviewService;
 import com.hoangnam25.hnam_courseware.utils.SecurityUtil;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/reviews")
@@ -23,5 +21,16 @@ public class ReviewController {
     public Response createReview(@RequestBody ReviewRequestDto request) {
         String username = SecurityUtil.getUsername();
         return new Response(reviewService.createReview(username, request));
+    }
+
+    @PatchMapping("/{id}")
+    public Response updateReview(@PathVariable Long id, @RequestBody ReviewUpdateRequestDto request) {
+        String username =  SecurityUtil.getUsername();
+        return new Response(reviewService.updateReview(id, username, request));
+    }
+    @DeleteMapping("/{id}")
+    public Response deleteReview(@PathVariable Long id) {
+        String username =  SecurityUtil.getUsername();
+        return new Response(reviewService.deleteReview(id, username));
     }
 }
